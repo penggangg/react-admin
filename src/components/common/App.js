@@ -3,7 +3,8 @@ import { Layout, Menu, Breadcrumb, Icon } from 'antd';
 import { Redirect, Link, Switch, Route } from 'react-router-dom';
 import 'antd/dist/antd.css';
 import HeaderCustomer from './HeaderCustomer'
-import UForm from '../form/Form'
+import FormTable from '../form/Form'
+import VueComponent from '../vue/VueComponent'
 import NoMatch from './404';
 import Index from '../index/Index';
 import history from './history';
@@ -55,9 +56,11 @@ class App extends Component {
                                 <span className="nav-text">人员信息</span>
                             </Link>
                         </Menu.Item>
-                        <Menu.Item key="3">
-                            <Icon type="upload" />
-                            <span className="nav-text">nav 3</span>
+                        <Menu.Item key="/app/Vue">
+                            <Link to="/app/Vue">
+                                <Icon type="upload" />
+                                <span className="nav-text">Vue模块</span>
+                            </Link>
                         </Menu.Item>
                         <SubMenu
                             key="sub1"
@@ -90,7 +93,8 @@ class App extends Component {
                         <div style={{ padding: 24, background: '#fff', minHeight: 780 }}>
                             <Switch>
                                 <Route exact path="/app" component={Index}/>
-                                <Route exact path="/app/form" component={UForm}/>
+                                <Route exact path="/app/form" component={FormTable}/>
+                                <Route exact path="/app/Vue" component={VueComponent}/>
                                 <Route component={NoMatch} />
                             </Switch>
                         </div>

@@ -1,11 +1,14 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { Table, Icon, Popconfirm } from 'antd';
+import { Table, Icon, Popconfirm, Button } from 'antd';
+import CollectionCreateForm from './CustomizedForm.js'
 class FormTable extends Component {
     state = {
         sortedInfo: null,
         filteredInfo: null,
-        data: []
+        data: [],
+        visible: false,
+        isUpdate: true
     }
     handleChange = (pagination, filters, sorter) => {
         console.log('Various parameters', pagination, filters, sorter);
@@ -13,6 +16,67 @@ class FormTable extends Component {
             sortedInfo: sorter,
             filteredInfo: filters
         });
+    }
+    handleCancle () {
+        this.setState({
+            visible: false
+        })
+    }
+    handleOk = () => {
+        this.form.validateFields((errors, values) => {
+            if (!errors) {
+                axios.get(this.state.isUpdate? 'http://localhost:3333/updateCustomer' : 'http://localhost:3333/addCustomer', {
+                    params: {...this.form.getFieldsValue()}
+                })
+                .then(res => {
+                    console.log(res)
+                    this.setState({
+                        visible: false
+                    })
+                    axios.get('http://localhost:3333/customerList')
+                    .then(res => {
+                        console.log(res)
+                        this.setState({
+                            data: res.data.customerList
+                        })
+                    })
+                })
+            }
+        })
+    }
+    handleDelete = (rowKey,record) => {
+        console.log(record)
+        axios.get(`http://localhost:3333/deleteCustomer?id=${record.id}`)
+        .then(res => {
+            axios.get('http://localhost:3333/customerList')
+            .then(res => {
+                console.log(res)
+                this.setState({
+                    data: res.data.customerList
+                })
+            })
+        })
+    }
+    saveFormRef = (form) => {
+        this.form = form
+    }
+    edit = (rowkey, record) => {
+        this.setState({
+            visible: true,
+            isUpdate: true
+        })
+        console.log(this)
+        this.form.setFieldsValue({
+            ...record
+        })
+        
+    }
+    addUser= () => {
+        this.form.resetFields()
+        this.setState({
+            visible: true,
+            isUpdate: false
+        })
     }
     componentDidMount(){
         axios.get('http://localhost:3333/customerList')
@@ -46,17 +110,26 @@ class FormTable extends Component {
                 fixed: 'right', 
                 width: 100,
                 align: 'center',
-                render: (text, record) =>
+                render: (text, record, rowkey) =>
                 <div className='opera'>
-                    <span>
-                         <Icon type="edit" /> 修改
+                    <span 
+                        style={ { cursor: 'pointer' } }
+                        onClick = { ()=>this.edit(rowkey,record) }
+                    >
+                        <Icon type="edit" /> 修改
                     </span><br />
-                    <span><Popconfirm title="确定要删除吗?" ><Icon type="minus-square-o" /> 删除 </Popconfirm></span>
+                    <span style={ { cursor: 'pointer' } }><Popconfirm title="确定要删除吗?" onConfirm={ ()=>this.handleDelete(rowkey,record)} ><Icon type="minus-square-o" /> 删除 </Popconfirm></span>
                 </div>
             },
         ];
         return(
-            <Table bordered columns={columns} dataSource={this.state.data} onChange={this.handleChange} scroll={{ x: 1300 }} />
+            <div>
+                <Button style={ { marginBottom: 30 } } onClick={this.addUser} type="primary" icon="user-add">新增</Button>
+                <Table bordered columns={columns} rowKey={record => record.id} dataSource={this.state.data} onChange={this.handleChange} scroll={{ x: 1300 }} />
+                { this.state.isUpdate? 
+                    <CollectionCreateForm ref={(form) => this.form = form} visible={this.state.visible} onCancel={this.handleCancle.bind(this)} onOk={this.handleOk} title="修改信息" okText="更新" /> : <CollectionCreateForm ref={(form) => this.form = form} visible={this.state.visible} onCancel={this.handleCancle.bind(this)} onOk={this.handleOk} title="新增人员" okText="添加" />
+                }
+            </div>
         );
     }
 }

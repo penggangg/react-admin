@@ -20,6 +20,8 @@ app.get('/', function (req, res) {
 })
 
 app.get('/addCustomer', require('./router/adddCustomer'))
+app.get('/updateCustomer', require('./router/updateCustomer'))
+app.get('/deleteCustomer', require('./router/deleteCustomer'))
 app.get('/customerList', require('./router/customerList'))
 const port = process.env.PORT || 3333
 
